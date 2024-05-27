@@ -12,7 +12,7 @@ import Combine
 public extension UIColor {
     static var bottomSheetOverlay: UIColor = .init {
         if $0.userInterfaceStyle == .dark {
-            return .white
+            return .black
         } else {
             return .black
         }
@@ -25,7 +25,7 @@ public struct BottomSheetConfig {
                 kind: Kind = .interactiveDismiss,
                 overlayColor: Color = .init(.bottomSheetOverlay),
                 shadow: Color? = .init(.black).opacity(0.4),
-                background: Color = .init(.systemBackground),
+                background: Color,
                 handleColor: Color = .init(.lightGray),
                 handlePosition: HandlePosition = .inside,
                 topBarCornerRadius: CGFloat? = nil,
@@ -86,11 +86,12 @@ public extension View {
     func bottomSheet<Content: View>(isPresented: Binding<Bool>,
                                     maxHeight: CGFloat = 600,
                                     useGesture: Bool = true,
+                                    backgroundColor: Color,
                                     @ViewBuilder content: @escaping () -> Content) -> some View {
 
         bottomSheet(isPresented: isPresented,
                     config: .init(maxHeight: maxHeight,
-                                  kind: useGesture ? .interactiveDismiss : .static),
+                                  kind: useGesture ? .interactiveDismiss : .static, background: backgroundColor),
                     content: content)
     }
 
@@ -115,10 +116,11 @@ public extension View {
     func bottomSheet<Content: View, T>(item: Binding<T?>,
                                        maxHeight: CGFloat = 600,
                                        useGesture: Bool = true,
+                                       backgroundColor: Color,
                                        @ViewBuilder content: @escaping (T) -> Content) -> some View {
         bottomSheet(item: item,
                     config: .init(maxHeight: maxHeight,
-                                  kind: useGesture ? .interactiveDismiss : .static),
+                                  kind: useGesture ? .interactiveDismiss : .static, background: backgroundColor),
                     content: content)
     }
 }
@@ -354,11 +356,12 @@ public struct BottomSheet_Preview: PreviewProvider {
                     isShown = true
                 }
             }
-            .bottomSheet(isPresented: $isShown) {
+            .bottomSheet(isPresented: $isShown, backgroundColor: Color.white) {
                 VStack {
                     OvergrowScrollView(maxHeight: 400) {
                         ZStack {
                             Color.red
+                            Text(" مبلغ دلخواهتان را از طریق پایا / ساتنا / پُل به شماره شبا زیر منتقل کنید. مبلغ به صورت خودکار طی سیکل بانکی (۲ الی ۲۴ ساعت) به موجودی شما افزوده خواهد شد. ")
                         }
                         .frame(width: 300, height: height)
                     }
