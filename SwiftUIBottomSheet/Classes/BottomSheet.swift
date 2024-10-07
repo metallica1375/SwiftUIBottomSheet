@@ -266,7 +266,7 @@ private struct BottomSheetContainer<Content: View>: View {
 
     @ViewBuilder
     func sheetContent(geometry: GeometryProxy) -> some View {
-        let shift = config.handlePosition == .inside && canDrag ? 0 : topBarHeight
+        let shift = config.handlePosition == .inside ? 0 : topBarHeight
 
         let clipShape = RoundedCorner(radius: topBarCornerRadius, corners: [.topLeft, .topRight])
 
@@ -302,7 +302,7 @@ private struct BottomSheetContainer<Content: View>: View {
     fileprivate func topBar(geometry: GeometryProxy) -> some View {
         if canDrag {
             BlurView(tintAlpha: 0)
-                    .frame(width: 40, height: 6)
+                    .frame(width: 80, height: 6)
                     .overlay(Color(.lightGray).opacity(0.8))
                     .clipShape(RoundedRectangle(cornerRadius: 6))
             .frame(width: geometry.size.width, height: topBarHeight)
@@ -331,7 +331,16 @@ private struct BottomSheetContainer<Content: View>: View {
                         dragStart = nil
                     }
             )
-        } else {
+        }
+        else if config.kind == .static {
+            BlurView(tintAlpha: 0)
+                    .frame(width: 80, height: 6)
+                    .overlay(Color(.lightGray).opacity(0.8))
+                    .clipShape(RoundedRectangle(cornerRadius: 6))
+            .frame(width: geometry.size.width, height: topBarHeight)
+            .contentShape(Rectangle())
+        }
+        else {
             ZStack { }
             .frame(width: geometry.size.width, height: topBarHeight)
             .contentShape(Rectangle())
@@ -345,6 +354,8 @@ public struct BottomSheet_Preview: PreviewProvider {
     public struct Preview: View {
         @State var isShown = false
         @State var height: Double = 100.0
+        
+        @State var kind: BottomSheetConfig.Kind = .static
 
         public init() {}
 
@@ -352,18 +363,24 @@ public struct BottomSheet_Preview: PreviewProvider {
             ZStack {
                 Color.yellow
                 Button("Booo") {
-                    height = height == 100.0 ? 400.0 : 100.0
                     isShown = true
                 }
             }
-            .bottomSheet(isPresented: $isShown, backgroundColor: Color.white) {
+            .bottomSheet(isPresented: $isShown, config: .init(kind: kind, background: Color.green)) {
                 VStack {
                     OvergrowScrollView(maxHeight: 400) {
                         ZStack {
                             Color.red
                             Text(" مبلغ دلخواهتان را از طریق پایا / ساتنا / پُل به شماره شبا زیر منتقل کنید. مبلغ به صورت خودکار طی سیکل بانکی (۲ الی ۲۴ ساعت) به موجودی شما افزوده خواهد شد. ")
+                                
                         }
                         .frame(width: 300, height: height)
+                        .onAppear {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                                kind = .interactiveDismiss
+                            }
+                            kind = .static
+                        }
                     }
 
                     Color.blue
